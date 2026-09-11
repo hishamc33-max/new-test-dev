@@ -1,9 +1,30 @@
+# Uptime Kuma - Production Docker Compose for AWS t4g.small (2GB RAM)
 services:
   uptime-kuma:
-    image: louislam/uptime-kuma:2
-    restart: unless-stopped
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    ports:
+      # Access in browser at http://<ec2-ip>:3001
+      - "3001:3001"
     volumes:
       - ./data:/app/data
-    ports:
-      # <Host Port>:<Container Port>
-      - "3001:3001"
+    environment:
+      # Restrict Node.js V8 engine memory heap limit to 512MB for t4g.small
+      - NODE_OPTIONS=--max-old-space-size=512
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
+      - TZ=UTC
+    deploy:
+      resources:
+        limits:
+          memory: 768M   # Hard cap for container
+        reservations:
+          memory: 256M   # Minimum reserved RAM
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  uptime-kuma-data:
