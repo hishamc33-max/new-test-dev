@@ -1,11 +1,11 @@
-# Optimized Multi-stage Dockerfile for Low RAM Environments (ARM64 / t4g.nano)
+# Optimized Multi-stage Dockerfile for AWS t4g.small (2GB RAM / ARM64)
 FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Skip Chromium download for Puppeteer to save ~300MB disk & build memory
+# Skip Chromium download for Puppeteer to save disk & build memory
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-ENV NODE_OPTIONS="--max-old-space-size=256"
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
@@ -18,7 +18,7 @@ FROM node:18-alpine AS release
 WORKDIR /app
 ENV UPTIME_KUMA_IS_CONTAINER=1
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=128"
+ENV NODE_OPTIONS="--max-old-space-size=512"
 
 COPY --from=build /app /app
 
